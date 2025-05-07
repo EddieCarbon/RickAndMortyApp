@@ -1,5 +1,5 @@
 //
-//  CharacterDetailsView.swift
+//  CharacterListView.swift
 //  RickAndMortyApp
 //
 //  Created by Jakub Tomiczek on 07/05/2025.
@@ -8,8 +8,8 @@
 import ComposableArchitecture
 import SwiftUI
 
-struct CharacterDetailsView: View {
-    let store: StoreOf<CharacterDetailsReducer>
+struct CharactersListView: View {
+    let store: StoreOf<CharactersListReducer>
     
     var body: some View {
         Text("Hello, World!")
@@ -17,11 +17,11 @@ struct CharacterDetailsView: View {
 }
 
 #Preview {
-    CharacterDetailsView(
+    CharactersListView(
         store: Store(
-            initialState: CharacterDetailsReducer.State(),
+            initialState: CharactersListReducer.State(),
             reducer: {
-                CharacterDetailsReducer()
+                CharactersListReducer()
             }
         )
     )

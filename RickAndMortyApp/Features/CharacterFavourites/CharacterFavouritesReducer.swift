@@ -9,7 +9,7 @@ import ComposableArchitecture
 import Foundation
 
 @Reducer
-struct CharacterFavouritesReducer {
+struct FavouritesCharactesReducer {
     @ObservableState
     struct State: Equatable {
         

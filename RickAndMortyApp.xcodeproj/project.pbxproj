@@ -39,8 +39,8 @@
 			membershipExceptions = (
 				Features/CharacterDetails/CharacterDetailsReducer.swift,
 				Features/CharacterDetails/CharacterDetailsView.swift,
-				Features/CharactersList/CharacterListView.swift,
 				Features/CharactersList/CharactersListReducer.swift,
+				Features/CharactersList/CharactersListView.swift,
 				Features/EpisodeDetails/EpisodeDetailsReducer.swift,
 				Features/EpisodeDetails/EpisodeDetailsView.swift,
 				Features/TabBar/TabBarReducer.swift,

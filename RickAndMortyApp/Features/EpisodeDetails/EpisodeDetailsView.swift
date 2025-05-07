@@ -9,11 +9,20 @@ import ComposableArchitecture
 import SwiftUI
 
 struct EpisodeDetailsView: View {
+    let store: StoreOf<EpisodeDetailsReducer>
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Text("Hello, World!")
     }
 }
 
 #Preview {
-    EpisodeDetailsView()
+    EpisodeDetailsView(
+        store: Store(
+            initialState: EpisodeDetailsReducer.State(),
+            reducer: {
+                EpisodeDetailsReducer()
+            }
+        )
+    )
 }

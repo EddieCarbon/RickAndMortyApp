@@ -8,12 +8,21 @@
 import ComposableArchitecture
 import SwiftUI
 
-struct CharacterFavouritesView: View {
+struct FavouritesCharactesView: View {
+    let store: StoreOf<FavouritesCharactesReducer>
+    
     var body: some View {
         Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
     }
 }
 
 #Preview {
-    CharacterFavouritesView()
+    FavouritesCharactesView(
+        store: Store(
+            initialState: FavouritesCharactesReducer.State(),
+            reducer: {
+                FavouritesCharactesReducer()
+            }
+        )
+    )
 }

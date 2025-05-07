@@ -13,12 +13,12 @@ struct TabBarView: View {
     
     var body: some View {
         TabView {
-            CharacterListView()
+            CharactersListView(store: <#T##StoreOf<CharactersListReducer>#>)
                 .tabItem {
                     Label("Characters", systemImage: "house")
                 }
             
-            CharacterFavouritesView()
+            FavouritesCharactesView(store: <#T##StoreOf<CharacterFavouritesReducer>#>)
                 .tabItem {
                     Label("Favourites", systemImage: "house")
                 }
