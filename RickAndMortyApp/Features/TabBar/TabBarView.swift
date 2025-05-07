@@ -5,14 +5,23 @@
 //  Created by Jakub Tomiczek on 07/05/2025.
 //
 
+import ComposableArchitecture
 import SwiftUI
 
 struct TabBarView: View {
+    let store: StoreOf<TabBarReducer>
+    
     var body: some View {
-        Text("Hello, World!")
+        TabView {
+            CharacterListView()
+                .tabItem {
+                    Label("Characters", systemImage: "house")
+                }
+            
+            CharacterFavouritesView()
+                .tabItem {
+                    Label("Favourites", systemImage: "house")
+                }
+        }
     }
-}
-
-#Preview {
-    TabBarView()
 }
