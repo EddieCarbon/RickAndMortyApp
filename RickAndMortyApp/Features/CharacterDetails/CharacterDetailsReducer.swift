@@ -11,8 +11,12 @@ import Foundation
 @Reducer
 struct CharacterDetailsReducer {
     @ObservableState
-    struct State: Equatable {
+    struct State: Equatable, Identifiable {
+        let character: Character
         
+        var id: Int {
+            character.id
+        }
     }
     
     enum Action: Equatable {
