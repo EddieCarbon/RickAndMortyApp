@@ -25,7 +25,7 @@ struct CharactersListView: View {
                     errorView(message: message)
                 }
             }
-            .navigationTitle("Characters")
+            .navigationTitle(store.viewState == .welcome ? "" : "Characters")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
