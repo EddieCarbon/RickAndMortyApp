@@ -93,27 +93,7 @@ extension CharactersListView {
             WithPerceptionTracking {
                 LazyVStack(spacing: 20) {
                     ForEach(store.characters, id: \.id) { character in
-                        NavigationLinkStore(
-                            store.scope(state: \.$characterDetails, action: \.characterDetails),
-                            id: character.id
-                        ) {
-                            store.send(.characterTapped(character))
-                        } destination: { store in
-                            CharacterDetailsView(store: store)
-                        } label: {
-                            CharacterRowView(character, isFavourte: store.favoriteCharacterIds.contains(character.id) == true)
-                        }
-                        .buttonStyle(.plain)
-                        .contextMenu {
-                            Button {
-                                store.send(.toggleFavorite(character))
-                            } label: {
-                                Label(
-                                    store.favoriteCharacterIds.contains(character.id) ? "Usuń z ulubionych" : "Dodaj do ulubionych",
-                                    systemImage: store.favoriteCharacterIds.contains(character.id) ? "star.slash" : "star.fill"
-                                )
-                            }
-                        }
+                        characterNavigationButton(character)
                     }
                     
                     if store.hasMorePages {
@@ -125,9 +105,9 @@ extension CharactersListView {
                 }
                 .padding(.horizontal)
             }
-            .refreshable {
-                store.send(.loadCharacters)
-            }
+        }
+        .refreshable {
+            store.send(.loadCharacters)
         }
     }
     
@@ -151,6 +131,30 @@ extension CharactersListView {
         .cornerRadius(12)
         .shadow(radius: 4)
         .padding()
+    }
+    
+    private func characterNavigationButton(_ character: Character) -> some View {
+        NavigationLinkStore(
+            store.scope(state: \.$characterDetails, action: \.characterDetails),
+            id: character.id
+        ) {
+            store.send(.characterTapped(character))
+        } destination: { store in
+            CharacterDetailsView(store: store)
+        } label: {
+            CharacterRowView(character, isFavourte: store.favoriteCharacterIds.contains(character.id) == true)
+        }
+        .buttonStyle(.plain)
+        .contextMenu {
+            Button {
+                store.send(.toggleFavorite(character))
+            } label: {
+                Label(
+                    store.favoriteCharacterIds.contains(character.id) ? "Usuń z ulubionych" : "Dodaj do ulubionych",
+                    systemImage: store.favoriteCharacterIds.contains(character.id) ? "star.slash" : "star.fill"
+                )
+            }
+        }
     }
 }
 
@@ -176,7 +180,7 @@ struct CharacterRowView: View {
                     .foregroundStyle(.text)
                 
                 Text("\(character.status), \(character.species)")
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundStyle(.text)
                     .opacity(0.9)
                 
