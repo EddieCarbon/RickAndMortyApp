@@ -9,33 +9,25 @@ import ComposableArchitecture
 import Foundation
 
 struct RMClient {
-    var fetchAllCharacters: () async throws -> [Character]
-    var fetchCharacters: ([String]) async throws -> [Character]
+    var fetchCharacters: (Int) async throws -> CharactersResult
+    var fetchCharactersByUrls: ([String]) async throws -> [Character]
     var fetchEpisodeDetails: (Int) async throws -> Episode?
 }
-
-// MARK: - Dependency Registration
 
 extension RMClient: DependencyKey {
     static var liveValue: Self {
         return RMClient(
-            fetchAllCharacters: {
-                guard let url = RMURLs.characters.asURL else {
-                    throw HTTPError.invalidURL
-                }
-                
+            fetchCharacters: { page in
+                let url = try RMURLs.characters(page).asURL()
                 let result: CharactersResult = try await request(url: url)
-                return result.results
+                return result
             },
-            fetchCharacters: { urls in
+            fetchCharactersByUrls: { urls in
                 let characters: [Character] = try await compactArrayRequest(for: urls)
                 return characters
             },
             fetchEpisodeDetails: { id in
-                guard let url = RMURLs.episode(id).asURL else {
-                    throw HTTPError.invalidURL
-                }
-                
+                let url = try RMURLs.episode(id).asURL()
                 return try await request(url: url)
             }
         )
@@ -54,39 +46,15 @@ extension DependencyValues {
 extension RMClient {
     static func request<Object: Codable>(url: URL) async throws -> Object {
         do {
-            let (data, response) = try await URLSession.shared.data(from: url)
-            
-            guard let httpResponse = response as? HTTPURLResponse else {
-                throw HTTPError.unexpectedResponse
-            }
-            
-            try validateHttpResponse(httpResponse)
-            
-            if data.isEmpty {
-                throw HTTPError.emptyResponse
-            }
-            
+            let data = try await URLSession.validateData(from: url)
             return try decode(data: data)
-            
-        } catch let error as HTTPError {
-            throw error
         } catch {
-            throw HTTPError.networkError(error.localizedDescription)
-        }
-    }
-    
-    static func validateHttpResponse(_ response: HTTPURLResponse) throws {
-        switch response.statusCode {
-        case 200...299:
-            break
-        case 429:
-            throw HTTPError.rateLimitExceeded
-        case 400...499:
-            throw HTTPError.serverError(response.statusCode)
-        case 500...599:
-            throw HTTPError.serverError(response.statusCode)
-        default:
-            throw HTTPError.unexpectedResponse
+            switch error {
+            case let error as HTTPError:
+                throw error
+            default:
+                throw HTTPError.networkError(error.localizedDescription)
+            }
         }
     }
     
@@ -111,6 +79,7 @@ extension RMClient {
                     guard let linkURL = URL(string: link) else {
                         throw HTTPError.invalidURL
                     }
+                    
                     return try await request(url: linkURL)
                 }
             }

@@ -37,14 +37,13 @@
 		7054A0F02DCB9B8100CE63B6 /* Exceptions for "RickAndMortyApp" folder in "RickAndMortyAppTests" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Core/Models/Pagination.swift,
 				Features/CharacterDetails/CharacterDetailsReducer.swift,
 				Features/CharacterDetails/CharacterDetailsView.swift,
-				Features/CharactersList/CharacterListView.swift,
 				Features/CharactersList/CharactersListReducer.swift,
+				Features/CharactersList/CharactersListView.swift,
 				Features/EpisodeDetails/EpisodeDetailsReducer.swift,
 				Features/EpisodeDetails/EpisodeDetailsView.swift,
-				Features/TabBar/TabBarReducer.swift,
-				Features/TabBar/TabBarView.swift,
 			);
 			target = 7054A0C52DCB993B00CE63B6 /* RickAndMortyAppTests */;
 		};

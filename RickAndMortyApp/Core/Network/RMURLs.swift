@@ -8,14 +8,14 @@
 import Foundation
 
 enum RMURLs {
-    case characters
+    case characters(_ page: Int = 1)
     case episode(Int)
     case character(Int)
     
     var url: String {
         switch self {
-        case .characters:
-            return APIConstant.host + "character"
+        case .characters(let page):
+            return APIConstant.host + "character?page=\(page)"
         case .episode(let id):
             return APIConstant.host + "episode/\(id)"
         case .character(let id):
@@ -23,8 +23,11 @@ enum RMURLs {
         }
     }
     
-    var asURL: URL? {
-        return URL(string: url)
+    func asURL() throws -> URL {
+        guard let url = URL(string: self.url) else {
+            throw HTTPError.invalidURL
+        }
+        return url
     }
 }
 
