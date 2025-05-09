@@ -8,18 +8,14 @@
 import Foundation
 
 enum RMURLs {
-    case characters(_ page: Int? = nil)
+    case characters(_ page: Int = 1)
     case episode(Int)
     case character(Int)
     
     var url: String {
         switch self {
         case .characters(let page):
-            if let page = page {
-                return APIConstant.host + "character?page=\(page)"
-            } else {
-                return APIConstant.host + "character"
-            }
+            return APIConstant.host + "character?page=\(page)"
         case .episode(let id):
             return APIConstant.host + "episode/\(id)"
         case .character(let id):

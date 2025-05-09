@@ -19,7 +19,6 @@ extension RMClient: DependencyKey {
         return RMClient(
             fetchCharacters: { page in
                 let url = try RMURLs.characters(page).asURL()
-                print("DEBUG: \(url)")
                 let result: CharactersResult = try await request(url: url)
                 return result
             },

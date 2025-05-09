@@ -142,7 +142,8 @@ extension CharactersListView {
         } destination: { store in
             CharacterDetailsView(store: store)
         } label: {
-            CharacterRowView(character, isFavourte: store.favoriteCharacterIds.contains(character.id) == true)
+            CharacterRowView(store: self.store, character: character)
+//            CharacterRowView(character, isFavourte: store.favoriteCharacterIds.contains(character.id) == true)
         }
         .buttonStyle(.plain)
         .contextMenu {
@@ -159,20 +160,32 @@ extension CharactersListView {
 }
 
 struct CharacterRowView: View {
+    @ComposableArchitecture.Bindable var store: StoreOf<CharactersListReducer>
     let character: Character
-    var isFavourite: Bool
+    
     
     init(
-        _ character: Character,
-        isFavourte: Bool = false
+        store: StoreOf<CharactersListReducer>,
+        character: Character,
     ) {
+        self.store = store
         self.character = character
-        self.isFavourite = isFavourte
     }
     
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .center, spacing: 10) {
             AvatarView(url: character.image)
+                .padding(5)
+                .overlay {
+                    if store.favoriteCharacterIds.contains(character.id) == true {
+                        VStack {
+                            Image(systemName: "star.fill")
+                                .foregroundStyle(.yellow)
+                                .padding(.bottom, 10)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    }
+                }
             
             VStack(alignment: .leading) {
                 Text(character.name)
@@ -183,16 +196,8 @@ struct CharacterRowView: View {
                     .font(.subheadline)
                     .foregroundStyle(.text)
                     .opacity(0.9)
-                
-                
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            
-            if isFavourite {
-                Image(systemName: "star.fill")
-                    .font(.headline)
-                    .foregroundStyle(.yellow)
-            }
         }
         .frame(maxWidth: .infinity, maxHeight: 50)
     }
@@ -200,7 +205,13 @@ struct CharacterRowView: View {
 
 #Preview {
     CharacterRowView(
-        Character(
+        store: Store(
+            initialState: CharactersListReducer.State(),
+            reducer: {
+                CharactersListReducer()
+            }
+        ),
+        character: Character(
             id: 1,
             name: "Rick Sanchez",
             status: "Alive",

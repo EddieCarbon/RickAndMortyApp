@@ -10,6 +10,8 @@ import Foundation
 
 @Reducer
 struct CharactersListReducer {
+    private static let favoritesKey = "favoriteCharacterIds"
+    
     enum ViewState: Equatable {
         case welcome
         case loading
@@ -133,14 +135,17 @@ struct CharactersListReducer {
                     state.favoriteCharacterIds.remove(character.id)
                 } else {
                     state.favoriteCharacterIds.insert(character.id)
-                } // UserDefaults
+                }
                 
+                let defaults = UserDefaults.standard
+                defaults.set(Array(state.favoriteCharacterIds), forKey: Self.favoritesKey)
                 return .none
                 
             case .loadFavorites:
-                // UserDefaults
                 return .run { send in
-                    await send(.favoritesLoaded([]))
+                    let defaults = UserDefaults.standard
+                    let favoriteIds = defaults.array(forKey: Self.favoritesKey) as? [Int] ?? []
+                    await send(.favoritesLoaded(Set(favoriteIds)))
                 }
                 
             case .favoritesLoaded(let favoriteIds):
