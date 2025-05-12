@@ -11,7 +11,7 @@ import Foundation
 struct RMClient {
     var fetchCharacters: (Int) async throws -> CharactersResult
     var fetchCharactersByUrls: ([String]) async throws -> [Character]
-    var fetchEpisodeDetails: (Int) async throws -> Episode?
+    var fetchEpisodesByUrls: ([String]) async throws -> [Episode]
 }
 
 extension RMClient: DependencyKey {
@@ -26,9 +26,24 @@ extension RMClient: DependencyKey {
                 let characters: [Character] = try await compactArrayRequest(for: urls)
                 return characters
             },
-            fetchEpisodeDetails: { id in
-                let url = try RMURLs.episode(id).asURL()
-                return try await request(url: url)
+            fetchEpisodesByUrls: { urls in
+                let ids = urls.compactMap { url -> Int? in
+                    guard let lastComponent = URL(string: url)?.lastPathComponent else { return nil }
+                    return Int(lastComponent)
+                }.filter { $0 > 0 }
+                
+                if !ids.isEmpty {
+                    let url = try RMURLs.episodes(ids).asURL()
+                    switch ids.count {
+                    case 1:
+                        let episode: Episode = try await request(url: url)
+                        return [episode]
+                    default:
+                        let episodes: [Episode] = try await request(url: url)
+                        return episodes
+                    }
+                }
+                return []
             }
         )
     }
@@ -61,7 +76,6 @@ extension RMClient {
     static func decode<Object: Codable>(data: Data) throws -> Object {
         do {
             let decoder = JSONDecoder()
-            decoder.keyDecodingStrategy = .convertFromSnakeCase
             return try decoder.decode(Object.self, from: data)
         } catch {
             throw HTTPError.decodingError(error.localizedDescription)
