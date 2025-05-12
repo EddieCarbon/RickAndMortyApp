@@ -13,20 +13,20 @@ struct CharacterDetailsView: View {
     @ComposableArchitecture.Bindable var store: StoreOf<CharacterDetailsReducer>
     
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                characterHeader
-                characterImage
-                characterInfo
-                episodesList
+        WithPerceptionTracking {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    characterHeader
+                    characterImage
+                    characterInfo
+                    episodesList
+                }
+                .padding()
             }
-            .padding()
-        }
-        .navigationTitle(store.character.name)
-        .navigationBarTitleDisplayMode(.large)
-        .task { await store.send(.onAppear).finish() }
-        .sheet(item: $store.scope(state: \.episodeDetails, action: \.episodeDetails)) { store in
-            WithPerceptionTracking {
+            .navigationTitle(store.character.name)
+            .navigationBarTitleDisplayMode(.large)
+            .task { await store.send(.onAppear).finish() }
+            .sheet(item: $store.scope(state: \.episodeDetails, action: \.episodeDetails)) { store in
                 NavigationView {
                     EpisodeDetailsView(store: store)
                         .navigationTitle("Episode Details")
