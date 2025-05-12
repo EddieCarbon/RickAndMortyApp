@@ -12,15 +12,17 @@ struct EpisodeDetailsView: View {
     @ComposableArchitecture.Bindable var store: StoreOf<EpisodeDetailsReducer>
     
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                episodeHeader
-                episodeDetails
-                characterCount
+        WithPerceptionTracking {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    episodeHeader
+                    episodeDetails
+                    characterCount
+                }
+                .padding()
             }
-            .padding()
+            .task { await store.send(.onAppear).finish() }
         }
-        .task { await store.send(.onAppear).finish() }
     }
     
     private var episodeHeader: some View {
