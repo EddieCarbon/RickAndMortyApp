@@ -66,7 +66,7 @@ extension CharactersListView {
                 .scaledToFill()
                 .clipShape(Circle())
                 .shadow(radius: 5)
-            
+
             Text("Oh jeez, hej wszystkim!")
                 .font(.title2)
                 .fontWeight(.bold)
@@ -76,7 +76,7 @@ extension CharactersListView {
             )
             .font(.subheadline)
             .multilineTextAlignment(.center)
-            
+
             Button {
                 store.send(.loadCharacters)
             } label: {
@@ -88,6 +88,7 @@ extension CharactersListView {
         }
         .padding()
     }
+
     
     private var loadingView: some View {
         ProgressView()
@@ -113,7 +114,7 @@ extension CharactersListView {
             store.send(.loadCharacters)
         }
     }
-    
+
     private func errorView(message: String) -> some View {
         VStack(spacing: 16) {
             Text("Błąd")
@@ -135,7 +136,7 @@ extension CharactersListView {
         .shadow(radius: 4)
         .padding()
     }
-    
+
     private func characterNavigationButton(_ character: Character) -> some View {
         NavigationLinkStore(
             store.scope(state: \.$characterDetails, action: \.characterDetails),
@@ -157,6 +158,7 @@ extension CharactersListView {
                     ? "Usuń z ulubionych" : "Dodaj do ulubionych",
                     systemImage: store.favoriteCharacterIds.contains(character.id)
                     ? "star.slash" : "star.fill"
+
                 )
             }
         }
@@ -166,7 +168,7 @@ extension CharactersListView {
 struct CharacterRowView: View {
     @ComposableArchitecture.Bindable var store: StoreOf<CharactersListReducer>
     let character: Character
-    
+
     init(
         store: StoreOf<CharactersListReducer>,
         character: Character,
@@ -174,7 +176,7 @@ struct CharacterRowView: View {
         self.store = store
         self.character = character
     }
-    
+
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
             AvatarView(url: character.image)
@@ -189,12 +191,12 @@ struct CharacterRowView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     }
                 }
-            
+
             VStack(alignment: .leading) {
                 Text(character.name)
                     .font(.headline)
                     .foregroundStyle(.text)
-                
+
                 Text("\(character.status), \(character.species)")
                     .font(.subheadline)
                     .foregroundStyle(.text)
@@ -233,7 +235,7 @@ struct CharacterRowView: View {
 
 struct AvatarView: View {
     var url: String
-    
+
     var body: some View {
         KFImage(URL(string: url))
             .placeholder {
