@@ -6,11 +6,12 @@
 //
 
 import ComposableArchitecture
+import Kingfisher
 import SwiftUI
 
 struct CharactersListView: View {
     @ComposableArchitecture.Bindable var store: StoreOf<CharactersListReducer>
-    
+
     var body: some View {
         NavigationView {
             ZStack {
@@ -63,15 +64,17 @@ extension CharactersListView {
                 .scaledToFill()
                 .clipShape(Circle())
                 .shadow(radius: 5)
-            
+
             Text("Oh jeez, hej wszystkim!")
                 .font(.title2)
                 .fontWeight(.bold)
-            
-            Text("*Uhh, ta aplikacja p-pozwala przeglądać postacie z Rick and Morty, wiesz, mnie, Ricka i innych. M-możesz zobaczyć różne informacje o każdym z nas i sprawdzić w-w jakich odcinkach się pojawiamy. \nRick mówi, że to głupie, ale ja myślę, że to całkiem fajne.*")
-                .font(.subheadline)
-                .multilineTextAlignment(.center)
-            
+
+            Text(
+                "*Uhh, ta aplikacja p-pozwala przeglądać postacie z Rick and Morty, wiesz, mnie, Ricka i innych. M-możesz zobaczyć różne informacje o każdym z nas i sprawdzić w-w jakich odcinkach się pojawiamy. \nRick mówi, że to głupie, ale ja myślę, że to całkiem fajne.*"
+            )
+            .font(.subheadline)
+            .multilineTextAlignment(.center)
+
             Button {
                 store.send(.loadCharacters)
             } label: {
@@ -83,11 +86,11 @@ extension CharactersListView {
         }
         .padding()
     }
-    
+
     private var loadingView: some View {
         ProgressView()
     }
-    
+
     private var charactersContentView: some View {
         ScrollView {
             WithPerceptionTracking {
@@ -95,7 +98,7 @@ extension CharactersListView {
                     ForEach(store.characters, id: \.id) { character in
                         characterNavigationButton(character)
                     }
-                    
+
                     if store.hasMorePages {
                         ProgressView()
                             .onAppear {
@@ -110,7 +113,7 @@ extension CharactersListView {
             store.send(.loadCharacters)
         }
     }
-    
+
     private func errorView(message: String) -> some View {
         VStack(spacing: 16) {
             Text("Błąd")
@@ -132,7 +135,7 @@ extension CharactersListView {
         .shadow(radius: 4)
         .padding()
     }
-    
+
     private func characterNavigationButton(_ character: Character) -> some View {
         NavigationLinkStore(
             store.scope(state: \.$characterDetails, action: \.characterDetails),
@@ -143,7 +146,6 @@ extension CharactersListView {
             CharacterDetailsView(store: store)
         } label: {
             CharacterRowView(store: self.store, character: character)
-//            CharacterRowView(character, isFavourte: store.favoriteCharacterIds.contains(character.id) == true)
         }
         .buttonStyle(.plain)
         .contextMenu {
@@ -151,8 +153,10 @@ extension CharactersListView {
                 store.send(.toggleFavorite(character))
             } label: {
                 Label(
-                    store.favoriteCharacterIds.contains(character.id) ? "Usuń z ulubionych" : "Dodaj do ulubionych",
-                    systemImage: store.favoriteCharacterIds.contains(character.id) ? "star.slash" : "star.fill"
+                    store.favoriteCharacterIds.contains(character.id)
+                        ? "Usuń z ulubionych" : "Dodaj do ulubionych",
+                    systemImage: store.favoriteCharacterIds.contains(character.id)
+                        ? "star.slash" : "star.fill"
                 )
             }
         }
@@ -162,8 +166,7 @@ extension CharactersListView {
 struct CharacterRowView: View {
     @ComposableArchitecture.Bindable var store: StoreOf<CharactersListReducer>
     let character: Character
-    
-    
+
     init(
         store: StoreOf<CharactersListReducer>,
         character: Character,
@@ -171,7 +174,7 @@ struct CharacterRowView: View {
         self.store = store
         self.character = character
     }
-    
+
     var body: some View {
         HStack(alignment: .center, spacing: 10) {
             AvatarView(url: character.image)
@@ -186,12 +189,12 @@ struct CharacterRowView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     }
                 }
-            
+
             VStack(alignment: .leading) {
                 Text(character.name)
                     .font(.headline)
                     .foregroundStyle(.text)
-                
+
                 Text("\(character.status), \(character.species)")
                     .font(.subheadline)
                     .foregroundStyle(.text)
@@ -230,18 +233,17 @@ struct CharacterRowView: View {
 
 struct AvatarView: View {
     var url: String
-    
+
     var body: some View {
-        AsyncImage(url: URL(string: url)) { image in
-            image
-                .resizable()
-                .scaledToFill()
-        } placeholder: {
-            ProgressView()
-        }
-        .frame(width: 50, height: 50)
-        .background(Color.gray.opacity(0.2))
-        .clipShape(Circle())
+        KFImage(URL(string: url))
+            .placeholder {
+                ProgressView()
+            }
+            .resizable()
+            .scaledToFill()
+            .frame(width: 50, height: 50)
+            .background(Color.gray.opacity(0.2))
+            .clipShape(Circle())
     }
 }
 

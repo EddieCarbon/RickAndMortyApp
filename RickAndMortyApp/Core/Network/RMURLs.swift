@@ -9,15 +9,16 @@ import Foundation
 
 enum RMURLs {
     case characters(_ page: Int = 1)
-    case episode(Int)
+    case episodes([Int])
     case character(Int)
     
     var url: String {
         switch self {
         case .characters(let page):
             return APIConstant.host + "character?page=\(page)"
-        case .episode(let id):
-            return APIConstant.host + "episode/\(id)"
+        case .episodes(let ids):
+            let idsString = ids.map { String($0) }.joined(separator: ",")
+            return APIConstant.host + "episode/\(idsString)"
         case .character(let id):
             return APIConstant.host + "character/\(id)"
         }
