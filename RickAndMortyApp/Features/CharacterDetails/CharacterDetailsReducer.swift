@@ -21,8 +21,8 @@ struct CharacterDetailsReducer {
     struct State: Equatable, Identifiable {
         let character: Character
         var episodesState: LoadingState = .idle
-        
-        @Presents var episodeDetails: EpisodeDetailsReducer.State?
+        var selectedEpisode: Episode?
+        var isEpisodeSheetPresented: Bool = false
         
         var episodes: [Episode] {
             if case let .loaded(episodes) = episodesState {
@@ -45,54 +45,59 @@ struct CharacterDetailsReducer {
             return nil
         }
         
+        var characterCount: Int {
+            selectedEpisode?.characters.count ?? 0
+        }
+        
         var id: Int {
             character.id
         }
     }
     
-    enum Action: Equatable {
+    enum Action: Equatable, BindableAction {
         case onAppear
         case episodesResponse(TaskResult<[Episode]>)
         case episodeSelected(Episode)
-        case episodeDetails(PresentationAction<EpisodeDetailsReducer.Action>)
+        case closeEpisodeSheet
+        case binding(BindingAction<State>)
     }
     
     @Dependency(\.rmClient) var rmClient
     
     var body: some ReducerOf<Self> {
+        BindingReducer()
+        
         Reduce { state, action in
             switch action {
             case .onAppear:
                 state.episodesState = .loading
-                
-                return .run { [episodeUrls = state.character.episode] send in
+                return .run { [episodesUrls = state.character.episode] send in
                     await send(.episodesResponse(TaskResult {
-                        try await rmClient.fetchEpisodesByUrls(episodeUrls)
+                        try await rmClient.fetchEpisodesByUrls(episodesUrls)
                     }))
                 }
                 
-            case .episodesResponse(.success(let episodes)):
-                state.episodesState = .loaded(episodes)
+            case .episodesResponse(.success(let result)):
+                state.episodesState = .loaded(result)
                 return .none
                 
-            case .episodesResponse(.failure(let error)):
-                state.episodesState = .error(error.localizedDescription)
+            case .episodesResponse(.failure(let result)):
+                state.episodesState = .error(result.localizedDescription)
                 return .none
                 
             case .episodeSelected(let episode):
-                state.episodeDetails = EpisodeDetailsReducer.State(episode: episode)
+                state.selectedEpisode = episode
+                state.isEpisodeSheetPresented = true
                 return .none
                 
-            case .episodeDetails(.presented(.onDismiss)):
-                state.episodeDetails = nil
+            case .closeEpisodeSheet:
+                state.selectedEpisode = nil
+                state.isEpisodeSheetPresented = false
                 return .none
                 
-            case .episodeDetails:
+            case .binding:
                 return .none
             }
-        }
-        .ifLet(\.$episodeDetails, action: \.episodeDetails) {
-            EpisodeDetailsReducer()
         }
     }
 }
