@@ -43,7 +43,6 @@
 				Features/CharacterDetails/CharacterDetailsView.swift,
 				Features/CharactersList/CharactersListReducer.swift,
 				Features/CharactersList/CharactersListView.swift,
-				Features/EpisodeDetails/EpisodeDetailsReducer.swift,
 				Features/EpisodeDetails/EpisodeDetailsView.swift,
 			);
 			target = 7054A0C52DCB993B00CE63B6 /* RickAndMortyAppTests */;

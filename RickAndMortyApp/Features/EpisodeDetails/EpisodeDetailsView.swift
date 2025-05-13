@@ -9,27 +9,43 @@ import ComposableArchitecture
 import SwiftUI
 
 struct EpisodeDetailsView: View {
-    @ComposableArchitecture.Bindable var store: StoreOf<EpisodeDetailsReducer>
+    @ComposableArchitecture.Bindable var store: StoreOf<CharacterDetailsReducer>
     
     var body: some View {
         WithPerceptionTracking {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    episodeHeader
-                    episodeDetails
-                    characterCount
+            VStack {
+                episodeHeader
+                
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        episodeDetails
+                        characterCount
+                    }
+                    .padding()
                 }
-                .padding()
             }
-            .task { await store.send(.onAppear).finish() }
         }
     }
     
     private var episodeHeader: some View {
-        Text(store.episode.name)
-            .font(.largeTitle)
-            .fontWeight(.bold)
-            .padding(.bottom, 2)
+        HStack {
+            Text(store.selectedEpisode?.name ?? "Error")
+                .font(.title)
+                .fontWeight(.bold)
+                .padding(.bottom, 2)
+            
+            Spacer()
+            
+            Button {
+                store.send(.closeEpisodeSheet)
+            } label: {
+                Image(systemName: "xmark")
+                    .font(.title2)
+                    .foregroundStyle(.text)
+            }
+        }
+        .padding(.top)
+        .padding(.horizontal)
     }
     
     private var episodeDetails: some View {
@@ -38,8 +54,8 @@ struct EpisodeDetailsView: View {
                 .font(.headline)
                 .padding(.vertical, 4)
             
-            infoRow(title: "Episode", value: store.episode.episode)
-            infoRow(title: "Air Date", value: store.episode.airDate)
+            infoRow(title: "Episode", value: store.selectedEpisode?.episode)
+            infoRow(title: "Air Date", value: store.selectedEpisode?.airDate)
         }
         .padding()
         .background(Color(.secondarySystemBackground))
@@ -53,20 +69,20 @@ struct EpisodeDetailsView: View {
                 .padding(.top, 8)
             
             Text("This episode features \(store.characterCount) character\(store.characterCount == 1 ? "" : "s").")
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
         }
         .padding()
         .background(Color(.tertiarySystemBackground))
         .cornerRadius(12)
     }
     
-    private func infoRow(title: String, value: String) -> some View {
+    private func infoRow(title: String, value: String?) -> some View {
         HStack(alignment: .top) {
             Text("\(title):")
                 .fontWeight(.semibold)
                 .frame(width: 80, alignment: .leading)
             
-            Text(value)
+            Text(value ?? "Error")
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
@@ -75,23 +91,33 @@ struct EpisodeDetailsView: View {
 #Preview {
     EpisodeDetailsView(
         store: Store(
-            initialState: EpisodeDetailsReducer.State(
-                episode: Episode(
+            initialState: CharacterDetailsReducer.State(
+                character: Character(
                     id: 1,
-                    name: "Pilot",
-                    airDate: "December 2, 2013",
-                    episode: "S01E01",
-                    characters: [
-                        "https://rickandmortyapi.com/api/character/1",
-                        "https://rickandmortyapi.com/api/character/2",
-                        "https://rickandmortyapi.com/api/character/35"
+                    name: "Rick Sanchez",
+                    status: "Alive",
+                    species: "Human",
+                    type: "",
+                    gender: "Male",
+                    origin: Location(name: "Earth", url: ""),
+                    location: Location(name: "Earth", url: ""),
+                    image: "https://rickandmortyapi.com/api/character/avatar/1.jpeg",
+                    episode: [
+                        "https://rickandmortyapi.com/api/episode/1",
+                        "https://rickandmortyapi.com/api/episode/2",
+                        "https://rickandmortyapi.com/api/episode/3"
                     ],
-                    url: "https://rickandmortyapi.com/api/episode/1",
-                    created: "2017-11-10T12:56:33.798Z"
-                )
+                    url: "",
+                    created: ""
+                ),
+                episodesState: .loaded([
+                    Episode(id: 1, name: "Pilot", airDate: "December 2, 2013", episode: "S01E01", characters: [], url: "", created: ""),
+                    Episode(id: 2, name: "Lawnmower Dog", airDate: "December 9, 2013", episode: "S01E02", characters: [], url: "", created: ""),
+                    Episode(id: 3, name: "Anatomy Park", airDate: "December 16, 2013", episode: "S01E03", characters: [], url: "", created: "")
+                ])
             ),
             reducer: {
-                EpisodeDetailsReducer()
+                CharacterDetailsReducer()
             }
         )
     )
