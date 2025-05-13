@@ -15,7 +15,7 @@ struct CharacterDetailsView: View {
     var body: some View {
         WithPerceptionTracking {
             ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
+                VStack {
                     characterHeader
                     characterImage
                     characterInfo
@@ -25,28 +25,15 @@ struct CharacterDetailsView: View {
             }
             .navigationTitle(store.character.name)
             .navigationBarTitleDisplayMode(.large)
-            .task { await store.send(.onAppear).finish() }
-            .sheet(item: $store.scope(state: \.episodeDetails, action: \.episodeDetails)) { store in
-                NavigationView {
-                    EpisodeDetailsView(store: store)
-                        .navigationTitle("Episode Details")
-                        .navigationBarTitleDisplayMode(.inline)
-                        .toolbar {
-                            ToolbarItem(placement: .topBarTrailing) {
-                                Button("Close") {
-                                    self.store.send(.episodeDetails(.presented(.onDismiss)))
-                                }
-                            }
-                        }
-                }
+            .onAppear { store.send(.onAppear) }
+            .sheet(isPresented: $store.isEpisodeSheetPresented) {
+                EpisodeDetailsView(store: self.store)
             }
         }
     }
     
-    // Character header with status
     private var characterHeader: some View {
         VStack(alignment: .leading, spacing: 8) {
-            
             HStack(spacing: 8) {
                 Circle()
                     .fill(statusColor)
@@ -56,9 +43,9 @@ struct CharacterDetailsView: View {
                     .font(.headline)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
     
-    // Character image
     private var characterImage: some View {
         KFImage(URL(string: store.character.image))
             .placeholder {
@@ -67,7 +54,7 @@ struct CharacterDetailsView: View {
             }
             .retry(maxCount: 3, interval: .seconds(2))
             .onFailure { error in
-                print("Kingfisher error loading image: \(error)")
+                print("error loading image: \(error)")
             }
             .resizable()
             .aspectRatio(contentMode: .fit)
@@ -75,7 +62,7 @@ struct CharacterDetailsView: View {
             .frame(maxWidth: .infinity)
     }
     
-    // Character information details
+    
     private var characterInfo: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Character Info")
@@ -92,7 +79,6 @@ struct CharacterDetailsView: View {
         .cornerRadius(12)
     }
     
-    // Episodes list section
     private var episodesList: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Episodes")
@@ -110,40 +96,44 @@ struct CharacterDetailsView: View {
                 
             case .error(let message):
                 Text("Error: \(message)")
-                    .foregroundColor(.red)
+                    .foregroundStyle(.red)
                     .padding()
                 
             case .loaded(let episodes):
-                if episodes.isEmpty {
-                    Text("No episodes found")
-                        .foregroundColor(.secondary)
-                        .padding()
-                } else {
-                    ForEach(episodes) { episode in
-                        Button {
-                            store.send(.episodeSelected(episode))
-                        } label: {
-                            HStack {
-                                Text(episode.episode)
-                                    .foregroundColor(.primary)
-                                
-                                Spacer()
-                                
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.gray)
-                            }
-                            .padding()
-                            .background(Color(.tertiarySystemBackground))
-                            .cornerRadius(8)
-                        }
-                        .buttonStyle(PlainButtonStyle())
-                    }
-                }
+                buildEpisodes(episodes)
             }
         }
     }
     
-    // Helper function to create info rows
+    @ViewBuilder
+    private func buildEpisodes(_ episodes: [Episode]) -> some View {
+        if episodes.isEmpty {
+            Text("No episodes found")
+                .foregroundStyle(.secondary)
+                .padding()
+        } else {
+            ForEach(episodes) { episode in
+                Button {
+                    store.send(.episodeSelected(episode))
+                } label: {
+                    HStack {
+                        Text(episode.episode)
+                            .foregroundStyle(.primary)
+                        
+                        Spacer()
+                        
+                        Image(systemName: "chevron.right")
+                            .foregroundStyle(.gray)
+                    }
+                    .padding()
+                    .background(Color(.tertiarySystemBackground))
+                    .cornerRadius(8)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+    
     private func infoRow(title: String, value: String) -> some View {
         HStack(alignment: .top) {
             Text("\(title):")
@@ -155,7 +145,6 @@ struct CharacterDetailsView: View {
         }
     }
     
-    // Helper computed property for status color
     private var statusColor: Color {
         switch store.character.status.lowercased() {
         case "alive":
